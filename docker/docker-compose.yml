@@ -1,0 +1,14 @@
+app:
+    build: ./app
+    expose:
+        - "9000"
+    volumes:
+        - ./../:/var/www/html/
+nginx:
+    build: ./nginx
+    ports:
+        - "80:80"
+    links:
+        - app
+    volumes_from:
+        - app

@@ -34,6 +34,8 @@
 
         private $postData = array();
 
+        private $data = array();
+
         /**
          * Constructor of the Builds class.
          */
@@ -55,7 +57,6 @@
          */
     	public function get() {
     		$ret = array();
-
             foreach ( $this->builds as $build ) {
                 array_push( $ret, array(
                     // CyanogenMod
@@ -83,6 +84,7 @@
          */
         public function setPostData( $customData ){
             $this->postData = $customData;
+			$this->data = $customData;
             $this->builds = array();
             $this->getBuilds();
         }
@@ -93,7 +95,6 @@
          */
     	public function getDelta() {
             $ret = false;
-
             $source = $this->postData['source_incremental'];
             $target = $this->postData['target_incremental'];
             if ( $source != $target ) {
@@ -125,6 +126,7 @@
             $path = Flight::cfg()->get('realBasePath') . '/builds/full';
             // Get the file list and parse it
     		$files = preg_grep( '/^([^.Thumbs])/', scandir( $path ) );
+
             if ( count( $files ) > 0  ) {
                 foreach ( $files as $file ) {
                     $extension = pathinfo($file, PATHINFO_EXTENSION);

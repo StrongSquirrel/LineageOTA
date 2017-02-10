@@ -88,7 +88,6 @@
                     }
                 }
             }
-
             return $ret;
         }
 
@@ -220,7 +219,7 @@
             if ( $token > '' ) {
                 $ret = $token;
                 if ( $token == 'experimental' ) $ret = 'snapshot';
-                if ( $token == 'unofficial' ) $ret = 'nightly';
+            //    if ( $token == 'unofficial' ) $ret = 'nightly';
             }
 
             return $ret;

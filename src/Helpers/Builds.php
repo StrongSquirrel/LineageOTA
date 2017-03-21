@@ -155,4 +155,46 @@
                 }
             }
     	}
+
+    	public function getBuildsByIncremental() {
+            $source = $this->postData['params']['source_incremental'];
+
+            $paths = array(
+                Flight::cfg()->get('realBasePath') . '/builds/delta',
+                Flight::cfg()->get('realBasePath') . '/builds/full'
+            );
+
+            foreach ($paths as $path) {
+                $files = preg_grep( '/^([^.Thumbs])/', scandir( $path ) );
+
+                if ( count( $files ) > 0  ) {
+                    foreach ( $files as $file ) {
+                        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+                        if ( $extension == 'zip' ) {
+                            // Try to find the build using memcached
+                            if ( Flight::cfg()->get( 'memcached.enabled') ) {
+                                $build = Flight::mc()->get( $file );
+
+                                // If not found there, we have to find it with the old fashion method...
+                                if ( !$build && Flight::mc()->getResultCode() == Memcached::RES_NOTFOUND ) {
+                                    $build = new Build( $file, $path);
+                                    // ...and then save it for the next lookup
+                                    Flight::mc()->set( $file, serialize($build), MEMCACHE_COMPRESSED );
+                                    // If we have found it, just unserialize it and continue
+                                } else {
+                                    $build = unserialize( $build );
+                                }
+                            } else {
+                                $build = new Build( $file, $path);
+                            }
+
+                            if ( $build->isMetaIncrementalValid( $source ) ) {
+                                array_push( $this->builds , $build );
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }

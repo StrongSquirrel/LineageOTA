@@ -133,6 +133,10 @@
                 )
               );
 
+              if (!empty($incrementalVersion)) {
+                  Flight::builds()->getBuildsByIncremental();
+              }
+
               $ret = array(
                   'id' => null,
                   'response' => Flight::builds()->get(),

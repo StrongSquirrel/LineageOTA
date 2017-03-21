@@ -38,6 +38,7 @@
         private $incremental = '';
         private $filePath = '';
         private $buildProp = '';
+        private $metaIncremental = '';
 
         /**
          * Constructor of the Build class.
@@ -68,9 +69,11 @@
             $this->changelogUrl = $this->_getChangelogUrl();
             $this->timestamp = filemtime( $this->filePath );
             $this->buildProp = explode( "\n", @file_get_contents('zip://'.$this->filePath.'#system/build.prop') );
+            $this->meta = explode( "\n", @file_get_contents('zip://'.$this->filePath.'#META-INF/com/android/metadata') );
             $this->incremental = $this->getBuildPropValue( 'ro.build.version.incremental' );
             $this->apiLevel = $this->getBuildPropValue( 'ro.build.version.sdk' );
             $this->model = $this->getBuildPropValue( 'ro.cm.device' );
+            $this->metaIncremental = $this->getMetaValue('pre-build-incremental');
     	}
 
         /**
@@ -88,6 +91,16 @@
                     }
                 }
             }
+            return $ret;
+        }
+
+        public function isMetaIncrementalValid($hash){
+            $ret = false;
+
+            if ($hash === $this->metaIncremental) {
+                $ret = true;
+            }
+
             return $ret;
         }
 
@@ -258,6 +271,26 @@
             $ret = '';
 
             foreach ($this->buildProp as $line) {
+                if ( strpos($line, $key) !== false ) {
+                    $tmp = explode('=', $line);
+                    $ret = $tmp[1];
+                    break;
+                }
+            }
+
+            return $ret;
+        }
+
+        /**
+         * Get a property value based on the $key value.
+         * It does it by searching inside the file build.prop of the current build.
+         * @param string $key The key for the wanted value
+         * @return string The value for the specified key
+         */
+        private function getMetaValue($key){
+            $ret = '';
+
+            foreach ($this->meta as $line) {
                 if ( strpos($line, $key) !== false ) {
                     $tmp = explode('=', $line);
                     $ret = $tmp[1];

@@ -100,7 +100,7 @@
                     'error' => null
                 );
 
-                Flight::json($ret);
+                $this->returnData($ret);
             });
 
             // Delta updates call
@@ -116,7 +116,7 @@
                     $ret = array_merge($ret, $delta);
                 }
 
-                Flight::json($ret);
+                $this->returnData($ret);
             });
 
             // LineageOS new API
@@ -143,7 +143,7 @@
                   'error' => null
               );
 
-              Flight::json($ret);
+                $this->returnData($ret);
             });
         }
 
@@ -154,7 +154,27 @@
             Flight::register( 'cfg', '\DotNotation', array(), function( $cfg ) {
                 $cfg->set( 'basePath', '' );
                 $cfg->set( 'realBasePath', realpath( __DIR__ . '/..' ) );
+                $cfg->set( 'debug', false );
+                $cfg->set( 'allowedIPs', ['127.0.0.1', '172.17.0.1', '188.232.168.227']);
             });
+        }
+
+        private function returnData($data) {
+            if (Flight::cfg()->get('debug')) {
+                if (in_array($_SERVER['REMOTE_ADDR'], Flight::cfg()->get('allowedIPs'))) {
+                    Flight::json($data);
+                } else {
+                    Flight::json(
+                        array(
+                            'id' => null,
+                            'response' => null,
+                            'error' => null
+                        )
+                    );
+                }
+            } else {
+                Flight::json($data);
+            }
         }
 
         /**
